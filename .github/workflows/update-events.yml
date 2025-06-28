@@ -1,0 +1,30 @@
+name: Update events.json from OneDrive
+
+on:
+  schedule:
+    - cron: '0 6 * * *'  # Runs at 6:00 UTC daily
+  workflow_dispatch:      # Allows manual trigger from GitHub UI
+
+jobs:
+  update-json:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download events.json from OneDrive
+        run: |
+          curl -f -L "https://onedrive.live.com/download?resid=84E1EEDCCF87A4DE!105&authkey=!EShW57wRxL5FlNr" -o events.json
+
+      - name: Commit & push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add events.json
+          if git diff --cached --quiet; then
+            echo "✅ No changes to commit."
+          else
+            git commit -m "🔄 Auto-update events.json from OneDrive"
+            git push
+          fi
